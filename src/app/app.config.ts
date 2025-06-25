@@ -4,7 +4,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http'
 import { routes } from './app.routes';
 import { AuthInterceptor } from './auth/auth.interceptor';
-import { NgApexChartModule } from 'ng-apexcharts';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(withFetch(),withInterceptors([AuthInterceptor])),
-    importProvidersFrom(NgApexChartModule,)
+    importProvidersFrom(NgApexchartsModule,)
   ]
 };
