@@ -7,7 +7,7 @@ import { Candle } from '../interfaces/candle';
 })
 export class CandleService {
 
-  private baseUrl = 'http://127.0.0.1:8000/api/auth/symbols/';
+    private readonly baseUrl = 'http://127.0.0.1:8000/api/auth';
 
 
   constructor(private http: HttpClient) { }
@@ -16,8 +16,13 @@ export class CandleService {
   //   return this.http.get<Candle[]>(this.baseUrl);
   // }
 
-  listSymbols() {
-    return this.http.get<string[]>(this.baseUrl);
+   listSymbols() {
+    return this.http.get<string[]>(`${this.baseUrl}/symbols/`);
   }
+
+  listBySymbol(symbol: string) {
+    return this.http.get<Candle[]>(`${this.baseUrl}/candles/${symbol}/`);
+  }
+
 
 }
