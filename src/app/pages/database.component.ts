@@ -27,10 +27,10 @@ const ELEMENT_DATA: PeriodicElement[] = [
     standalone: true,
     providers: [],
     imports: [
-        RouterModule,
         CommonModule,
-        ReactiveFormsModule,
+        RouterModule,
         FormsModule,
+        ReactiveFormsModule,     
 
 
         MatTableModule,
