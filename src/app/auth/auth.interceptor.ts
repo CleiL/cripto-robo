@@ -9,6 +9,10 @@ export const AuthInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
+  if (req.url.includes('/login') || req.url.includes('/register')) {
+    return next(req);
+  }
+
   const authService = inject(AuthService);
   const token = authService.getToken();
 
@@ -21,3 +25,4 @@ export const AuthInterceptor: HttpInterceptorFn = (
 
   return next(req);
 };
+
