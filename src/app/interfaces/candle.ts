@@ -8,4 +8,11 @@ export interface Candle {
         close: number;
         volume: number;
     };
+
+    mediumFast?: number;
+    mediumSlow?: number;
+    rsi?: number;
+    bbUpper?: number;
+    bbLower?: number;
+    rsiStatus?: string;
 }
