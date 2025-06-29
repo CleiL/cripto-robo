@@ -593,12 +593,26 @@ import * as Plotly from 'plotly.js-dist-min';
                 <mat-paginator #paginatorMovingAverageRSIBB [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page"></mat-paginator>
             </mat-card-content>
         </mat-card>
-        <mat-card>
-        <mat-card>
-  <mat-card-title>Visualização Gráfica</mat-card-title>
-  <div #plotlyChart style="width: 100%; height: 600px;"></div>
-</mat-card>
+        <mat-card class="database-section">
+        <mat-card class="database-section">
+            <mat-card-title>Visualização Avançada (Gráfico Completo)</mat-card-title>
+            <mat-card-subtitle>Visualize todas as camadas técnicas sobrepostas.</mat-card-subtitle>
 
+            <section class="chart-controls">
+                <mat-checkbox [(ngModel)]="showVolume">Mostrar Volume</mat-checkbox>
+                <mat-checkbox [(ngModel)]="showMA">Médias Móveis</mat-checkbox>
+                <mat-checkbox [(ngModel)]="showBB">Bandas de Bollinger</mat-checkbox>
+                <mat-checkbox [(ngModel)]="showRSI">RSI</mat-checkbox>
+
+                <button mat-raised-button color="accent"
+                (click)="renderFullChart()"
+                [disabled]="!dataSourceMovingAvarageRSIBB.data.length">
+                📈 Ver Gráfico Técnico Completo
+                </button>
+            </section>
+
+            <div #unifiedChart class="unified-chart" *ngIf="isUnifiedChartVisible"></div>
+        </mat-card>
 
     `,
     styles: [`
@@ -713,6 +727,30 @@ import * as Plotly from 'plotly.js-dist-min';
             border-radius: 4px;
         }
 
+        .graph-price-vol {
+            margin-top: 1rem; 
+            text-align: center;
+        }
+
+        .vol-chart {
+            width: 100%; 
+            height: 100%; 
+            margin-top: 1rem;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        .unified-chart {
+            width: 100%;
+            height: 700px;
+        }
+
+
         
     `],
 })
@@ -798,12 +836,18 @@ export class DatabaseComponent implements OnInit {
         { key: 'bbLower', label: 'BB Lower', visible: true },
     ];
 
+    showVolume = true;
+    showMA = true;
+    showBB = true;
+    showRSI = true;
+    isUnifiedChartVisible = false;
+
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild('paginatorMovingAverage') paginatorMovingAverage!: MatPaginator;
     @ViewChild('paginatorMovingAverageRSI') paginatorMovingAverageRSI!: MatPaginator;
     @ViewChild('paginatorMovingAverageRSIBB') paginatorMovingAverageRSIBB!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
-    @ViewChild('plotlyChart', { static: false }) plotlyChartRef!: ElementRef<HTMLDivElement>;
+    @ViewChild('unifiedChart', { static: false }) unifiedChartRef!: ElementRef<HTMLDivElement>;
 
 
     ngAfterViewInit() {
@@ -870,7 +914,6 @@ export class DatabaseComponent implements OnInit {
                 this.#snackBar.open(`Candle data for ${this.selectedSymbol} loaded successfully!`, 'Close', {
                     duration: 3000,
                 });
-
             },
             error: (err) => {
                 console.error('Error when searching for candles:', err);
@@ -1016,50 +1059,6 @@ export class DatabaseComponent implements OnInit {
             next: (data) => {
                 this.dataSourceMovingAvarageRSIBB.data = data;
                 this.#snackBar.open('Indicadores BB calculados com sucesso!', 'Fechar', { duration: 3000 });
-
-                // 🎯 Geração do gráfico
-                const timestamps = data.map(d => d.timestamp);
-                const close = data.map(d => d.data.close);
-                const upper = data.map(d => d.bbUpper);
-                const lower = data.map(d => d.bbLower);
-
-                const traceClose = {
-                    x: timestamps,
-                    y: close,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'Close',
-                    line: { color: '#2196f3' }
-                };
-
-                const traceUpper = {
-                    x: timestamps,
-                    y: upper,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'BB Upper',
-                    line: { color: '#e91e63', dash: 'dot' }
-                };
-
-                const traceLower = {
-                    x: timestamps,
-                    y: lower,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'BB Lower',
-                    line: { color: '#4caf50', dash: 'dot' }
-                };
-
-                const layout = {
-                    title: `Indicadores - ${symbol}`,
-                    xaxis: { title: 'Data' },
-                    yaxis: { title: 'Preço' }
-                };
-
-                setTimeout(() => {
-                    Plotly.newPlot(this.plotlyChartRef.nativeElement, [traceClose, traceUpper, traceLower], layout);
-
-                }, 0);
             },
             error: (err) => {
                 console.error('Erro ao calcular BB:', err);
@@ -1069,6 +1068,187 @@ export class DatabaseComponent implements OnInit {
                 this.isLoadingMovingAverages = false;
             }
         });
+    }
+
+
+    renderFullChart(): void {
+        const data = this.dataSourceMovingAvarageRSIBB.data;
+        if (!data.length) return;
+
+        const timestamps = data.map(d => d.timestamp);
+        const open = data.map(d => d.data.open);
+        const high = data.map(d => d.data.high);
+        const low = data.map(d => d.data.low);
+        const close = data.map(d => d.data.close);
+        const volume = data.map(d => d.data.volume);
+        const maFast = data.map(d => d.mediumFast);
+        const maSlow = data.map(d => d.mediumSlow);
+        const bbUpper = data.map(d => d.bbUpper);
+        const bbLower = data.map(d => d.bbLower);
+        const rsi = data.map(d => d.rsi);
+
+        const traces: any[] = [];
+
+        // Candlestick
+        traces.push({
+            x: timestamps,
+            open, high, low, close,
+            type: 'candlestick',
+            name: 'Candles',
+            xaxis: 'x',
+            yaxis: 'y'
+        });
+
+        // Volume
+        if (this.showVolume) {
+            traces.push({
+                x: timestamps,
+                y: volume,
+                type: 'bar',
+                name: 'Volume',
+                marker: { color: '#9e9e9e' },
+                xaxis: 'x',
+                yaxis: 'y2'
+            });
+        }
+
+        // Médias Móveis
+        if (this.showMA) {
+            traces.push({
+                x: timestamps,
+                y: maFast,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'MA Rápida',
+                line: { color: '#2196f3' }
+            });
+
+            traces.push({
+                x: timestamps,
+                y: maSlow,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'MA Lenta',
+                line: { color: '#673ab7' }
+            });
+        }
+
+        // Bollinger Bands
+        if (this.showBB) {
+            traces.push({
+                x: timestamps,
+                y: bbUpper,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'BB Superior',
+                line: { color: '#f44336', dash: 'dot' }
+            });
+            traces.push({
+                x: timestamps,
+                y: bbLower,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'BB Inferior',
+                line: { color: '#4caf50', dash: 'dot' }
+            });
+        }
+
+        // RSI e linhas guia
+        if (this.showRSI) {
+            traces.push({
+                x: timestamps,
+                y: rsi,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'RSI',
+                line: { color: '#ff9800' },
+                yaxis: 'y3'
+            });
+
+            traces.push({
+                x: timestamps,
+                y: Array(timestamps.length).fill(70),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'RSI 70',
+                line: { color: '#c62828', dash: 'dot' },
+                yaxis: 'y3',
+                hoverinfo: 'skip'
+            });
+
+            traces.push({
+                x: timestamps,
+                y: Array(timestamps.length).fill(30),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'RSI 30',
+                line: { color: '#2e7d32', dash: 'dot' },
+                yaxis: 'y3',
+                hoverinfo: 'skip'
+            });
+        }
+
+        const layout: any = {
+            title: `Análise Técnica - ${this.selectedSymbolBB}`,
+            height: 700,
+            xaxis: {
+                domain: [0, 1],
+                type: 'category',
+                title: 'Data',
+                tickangle: -45,
+                tickmode: 'auto',
+                nticks: 25
+            },
+            yaxis: { domain: [0.4, 1], title: 'Preço' },
+            legend: { orientation: 'h' },
+            dragmode: 'zoom',
+            hovermode: 'x unified',
+            margin: { t: 40, r: 30, b: 40, l: 60 },
+            uirevision: true
+        };
+
+        if (this.showVolume) {
+            layout.yaxis2 = { domain: [0.25, 0.39], title: 'Volume', showticklabels: true };
+        }
+        if (this.showRSI) {
+            layout.yaxis3 = { domain: [0, 0.24], title: 'RSI', showticklabels: true };
+        }
+
+        const config = {
+            responsive: true,
+            displayModeBar: true,
+            displaylogo: false,
+            modeBarButtonsToAdd: ['zoom2d', 'pan2d', 'resetScale2d', 'toImage']
+        };
+
+        this.isUnifiedChartVisible = true;
+        setTimeout(() => {
+            const win = window.open('', '_blank');
+            if (!win) return;
+
+            const htmlContent = `
+                <html>
+                <head>
+                    <title>Análise Técnica - ${this.selectedSymbolBB}</title>
+                    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+                </head>
+                <body style="margin:0;padding:0">
+                    <div id="plot" style="width:100%;height:100vh;"></div>
+                    <script>
+                    const traces = ${JSON.stringify(traces)};
+                    const layout = ${JSON.stringify(layout)};
+                    const config = ${JSON.stringify(config)};
+                    Plotly.newPlot('plot', traces, layout, config);
+                    </script>
+                </body>
+                </html>
+            `;
+
+            win.document.open();
+            win.document.write(htmlContent);
+            win.document.close();
+        }, 0);
+
     }
 
 
