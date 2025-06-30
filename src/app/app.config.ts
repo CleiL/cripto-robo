@@ -5,6 +5,7 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { routes } from './app.routes';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,6 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(withFetch(),withInterceptors([AuthInterceptor])),
+    provideNativeDateAdapter(),
     importProvidersFrom(NgApexchartsModule,)
   ]
 };

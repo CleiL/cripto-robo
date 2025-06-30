@@ -31,7 +31,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
                 <button mat-mini-fab matTooltip="Backtest e Dados" [routerLink]="['/home/database']">
                     <mat-icon class="material-symbols-outlined">database</mat-icon>
                 </button>
-                <button mat-mini-fab matTooltip="Análises" [routerLink]="['/analysys']">
+                <button mat-mini-fab matTooltip="Análises" [routerLink]="['/home/analysys']">
                     <mat-icon>analytics</mat-icon>
                 </button>
                 <button mat-mini-fab matTooltip="Alocações" [routerLink]="['/alocation']">

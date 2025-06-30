@@ -8,6 +8,7 @@ export const routes: Routes = [
     { path: 'home', canActivate: [authGuard], loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
         children: [
             { path: 'database', canActivate: [authGuard], loadComponent: () => import('./pages/database.component').then(m => m.DatabaseComponent) },        
+            { path: 'analysys', canActivate: [authGuard], loadComponent: () => import('./pages/analytics.component').then(m => m.AnalyticsComponent) },
             { path: 'user-manager', canActivate: [authGuard], loadComponent: () => import('./pages/user-manager.component').then(m => m.UserManagerComponent) },
         ]
     },

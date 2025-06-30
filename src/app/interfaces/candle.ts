@@ -15,4 +15,5 @@ export interface Candle {
     bbUpper?: number;
     bbLower?: number;
     rsiStatus?: string;
+    signal?: 'COMPRA' | 'VENDA' | null;
 }

@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, Signal } from '@angular/core';
 import { Candle } from '../interfaces/candle';
 import { Observable } from 'rxjs';
 
@@ -80,6 +80,49 @@ export class CandleService {
 
     return this.http.get<Candle[]>(`${this.baseUrl}/candles/bollinger/${symbol}/${fast}/${slow}/`, { params });
   }
+
+  getAnalysis(
+    symbol: string,
+    fast: number,
+    slow: number,
+    start?: string,
+    end?: string,
+    rsiOverbought = 70,
+    rsiOversold = 30
+  ): Observable<{ date: string; type: string; price: number }[]> {
+    const params: any = {
+      start_date: start,
+      end_date: end,
+      rsi_overbought: rsiOverbought,
+      rsi_oversold: rsiOversold
+    };
+    return this.http.get<{ date: string; type: string; price: number }[]>(
+      `${this.baseUrl}/analysis/${symbol}/${fast}/${slow}/`,
+      { params }
+    );
+  }
+
+  getTechnicalAnalysis(
+    symbol: string,
+    fast: number,
+    slow: number,
+    start?: string,
+    end?: string,
+    rsiOverbought?: number,
+    rsiOversold?: number
+  ): Observable<Candle[]> {
+    let params = new HttpParams()
+      .set('start_date', start || '')
+      .set('end_date', end || '')
+      .set('rsi_overbought', rsiOverbought?.toString() || '70')
+      .set('rsi_oversold', rsiOversold?.toString() || '30');
+
+    return this.http.get<Candle[]>(
+      `${this.baseUrl}/analysis/${symbol}/${fast}/${slow}/`,
+      { params }
+    );
+  }
+
 
 
 }
